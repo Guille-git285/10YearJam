@@ -4,15 +4,9 @@ using UnityEngine;
 
 public class GCStartState : MachineState
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public override void OnStateEnter() { }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public override void OnStateUpdate() { }
+
+    public override void OnStateExit() { }
 }

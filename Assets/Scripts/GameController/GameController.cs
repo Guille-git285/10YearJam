@@ -4,78 +4,105 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 
+public enum SceneType
+{
+    MENU,
+    LEVEL
+}
+
 public class GameController : MonoBehaviour
 {
-    private static GameController instance = null;
-    public static GameController Instance { get { return instance; } }
-
-    public bool IsPaused { get; set; }
-    
-    [SerializeField] private string priorScene;
     [SerializeField] private string currentScene;
+    [SerializeField] private string nextScene;
+    [SerializeField] private SceneType sceneType;
 
     [SerializeField] private StateMachineRoot stateMachine;
 
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject playerPrefab;
 
+    [SerializeField] private GameObject menuCamera;
+    [SerializeField] private GameObject loadingScreen;
+
+    public UnityEvent OnGameStart;
+    public UnityEvent OnGameLoading;
+
+    public UnityEvent OnSceneLoading;
+    public UnityEvent OnSceneLoaded;
+
+    public UnityEvent OnMainMenu;
+    public UnityEvent OnCheckPointLoad;
+
+    public UnityEvent OnGamePause;
+    public UnityEvent OnGamePauseResume;
+
     public UnityEvent OnGameOver;
 
-    public void TransitionTo(string scene, string marker)
+    public string CurrentScene { get => currentScene; }
+    public string NextScene { get => nextScene; }
+    public GameObject LoadingScreen { get => loadingScreen; }
+    public SceneType SceneType { get => sceneType; }
+    public GameObject MenuCamera { get => menuCamera; }
+
+    void Awake()
     {
-        if (player != null)
+        if (SceneManager.sceneCount > 1)
         {
-            player.SetActive(false);
+            currentScene = SceneManager.GetSceneAt(1).name;
         }
-        StartCoroutine(Transitioning(scene, marker));
     }
 
-    private IEnumerator Transitioning(string scene, string marker)
+    void Start()
     {
-        priorScene = currentScene;
-        currentScene = scene;
 
-        AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(priorScene);
+    }
 
-        while (!asyncUnload.isDone)
-        {
-            yield return null;
-        }
+    public void LoadMainMenu ()
+    {
+        nextScene = "MainMenu";
+        sceneType = SceneType.MENU;
+        stateMachine.ChangeState("LoadingState");
+    }
 
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+    public void StartNewGame ()
+    {
+        nextScene = "EntryArea";
+        sceneType = SceneType.LEVEL;
+        stateMachine.ChangeState("LoadingState");
+    }
 
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
+    public void LoadCheckPoint ()
+    {
+        Debug.Log("Load Checkpoint");
+        stateMachine.ChangeState("LoadingState");
+    }
 
-        if (player != null)
-        {
-            Transform markerTransform = GameObject.Find(marker).transform;
-            player.transform.SetPositionAndRotation(markerTransform.position, markerTransform.rotation);
-            player.SetActive(true);
-        }
+    public void SaveCheckPoint ()
+    {
+        Debug.Log("Save Checkpoint");
     }
 
     public void PauseGame()
     {
-        Time.timeScale = 0;
-        Cursor.lockState = CursorLockMode.Confined;
+        //Time.timeScale = 0;
+        //Cursor.lockState = CursorLockMode.Confined;
+        stateMachine.ChangeState("PauseState");
     }
 
     public void ResumeGame()
     {
-        Time.timeScale = 1;
-        Cursor.lockState = CursorLockMode.Locked;
+        //Time.timeScale = 1;
+        //Cursor.lockState = CursorLockMode.Locked;
+        stateMachine.ChangeState("PlayingState");
     }
 
     public void ExitGame()
     {
-        Application.Quit(0);
+        stateMachine.ChangeState("ExitingState");
     }
 
-    public void GameOver()
+    public void GameOver ()
     {
-
+        stateMachine.ChangeState("GameOverState");
     }
 }

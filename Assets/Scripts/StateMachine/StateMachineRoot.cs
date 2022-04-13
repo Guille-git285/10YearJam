@@ -19,11 +19,6 @@ public class StateMachineRoot : MonoBehaviour
 
     void Start()
     {
-        foreach (MachineState state in states)
-        {
-            state.enabled = false;
-        }
-
         if (entry_state != null)
         {
             current_state = entry_state;

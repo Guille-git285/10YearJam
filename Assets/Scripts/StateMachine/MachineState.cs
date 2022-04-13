@@ -5,6 +5,13 @@ using UnityEngine;
 public abstract class MachineState : MonoBehaviour
 {
     [SerializeField] private string stateName;
+    [SerializeField] protected StateMachineRoot root;
+
+    protected virtual void Awake()
+    {
+        root = GetComponentInParent<StateMachineRoot>();
+        this.enabled = false;
+    }
 
     public virtual string StateName { get => stateName; set => stateName = value; }
 

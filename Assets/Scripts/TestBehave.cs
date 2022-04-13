@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainMenu : MonoBehaviour
+public class TestBehave : MonoBehaviour
 {
     private GameController gameController;
 
@@ -10,36 +10,35 @@ public class MainMenu : MonoBehaviour
     {
         gameController = Component.FindObjectOfType<GameController>();
     }
-
+    
     // Start is called before the first frame update
     void Start()
     {
-        
+        Invoke("GameOver", 4f);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void Continue ()
-    {
-        gameController.LoadCheckPoint();
-    }
-
-    public void StartGame ()
-    {
-        gameController.StartNewGame();
-    }
-
-    public void Options ()
+    public void GameOver ()
     {
 
     }
 
-    public void ExitGame ()
+    public void PauseGame ()
     {
-        gameController.ExitGame();
+
+    }
+
+    public void ResumeGame ()
+    {
+
+    }
+
+    public void NextLevel ()
+    {
+
+    }
+
+    public void MainMenu ()
+    {
+
     }
 }

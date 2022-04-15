@@ -9,7 +9,7 @@ public class InteractionController : MonoBehaviour
     [SerializeField] private string interactButton = "Interact";
 
     [Header("Interactions")]
-    [SerializeField] private float interactionDistance = 5.0f;
+    [SerializeField] private float interactionDistance = 3.0f;
     [SerializeField] private LayerMask interactableMask;
 
     void Update()

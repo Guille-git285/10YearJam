@@ -278,6 +278,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86328401d1cae794189836731739ea97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 115239680}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!65 &115239682
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4723,7 +4738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactButton: Interact
-  interactionDistance: 5
+  interactionDistance: 3
   interactableMask:
     serializedVersion: 2
     m_Bits: 64

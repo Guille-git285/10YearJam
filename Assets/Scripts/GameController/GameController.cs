@@ -10,6 +10,13 @@ public enum SceneType
     LEVEL
 }
 
+public struct LoadData
+{
+    public string SceneName;
+    public SceneType Type;
+    public string MarkerName;
+}
+
 public class GameController : MonoBehaviour
 {
     [SerializeField] private string currentScene;
@@ -74,6 +81,13 @@ public class GameController : MonoBehaviour
     public void LoadCheckPoint ()
     {
         Debug.Log("Load Checkpoint");
+        stateMachine.ChangeState("LoadingState");
+    }
+
+    public void LoadLevel (string levelName, string markerName)
+    {
+        nextScene = levelName;
+        sceneType = SceneType.LEVEL;
         stateMachine.ChangeState("LoadingState");
     }
 

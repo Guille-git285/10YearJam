@@ -64,6 +64,5 @@ public class GCLoadingState : GCState
             GameControl.MenuCamera.SetActive(false);
         }
         ChangeState(nextState);
-        Debug.Log("End Loading");
     }
 }

@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-
     [Header("Input")]
     [SerializeField] private string mouseXAxis = "Mouse X";
     [SerializeField] private string mouseYAxis = "Mouse Y";

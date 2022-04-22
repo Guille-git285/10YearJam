@@ -11,6 +11,11 @@ public abstract class InteractableObject : MonoBehaviour
 
     void Awake()
     {
+
+    }
+
+    void Start()
+    {
         gameController = FindObjectOfType<GameController>();
     }
 

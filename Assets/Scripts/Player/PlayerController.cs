@@ -85,81 +85,84 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        isOnGround = controller.isGrounded;
-
-        currentAcceleration = isOnGround ? movementAccelOnGround : movementAccelOffGround;
-        targetDirection.x = Mathf.MoveTowards(targetDirection.x, Input.GetAxisRaw(horizontalAxis), currentAcceleration);
-        targetDirection.z = Mathf.MoveTowards(targetDirection.z, Input.GetAxisRaw(verticalAxis), currentAcceleration);
-
-        currentDirection = transform.right * targetDirection.x + transform.forward * targetDirection.z;
-        currentDirection = Vector3.ClampMagnitude(currentDirection, 1.0f);
-
-        controllerGravity = Physics.gravity.y * gravityScale;
-
-        if (isOnGround)
+        if (!GameController.isGamePaused)
         {
-            currentVelocity.y = -2.0f;
-            controller.slopeLimit = 45.0f;
-            controller.stepOffset = 0.5f;
+            isOnGround = controller.isGrounded;
 
-            lastTimeOnGround = coyoteTime;
+            currentAcceleration = isOnGround ? movementAccelOnGround : movementAccelOffGround;
+            targetDirection.x = Mathf.MoveTowards(targetDirection.x, Input.GetAxisRaw(horizontalAxis), currentAcceleration);
+            targetDirection.z = Mathf.MoveTowards(targetDirection.z, Input.GetAxisRaw(verticalAxis), currentAcceleration);
+
+            currentDirection = transform.right * targetDirection.x + transform.forward * targetDirection.z;
+            currentDirection = Vector3.ClampMagnitude(currentDirection, 1.0f);
+
+            controllerGravity = Physics.gravity.y * gravityScale;
+
+            if (isOnGround)
+            {
+                currentVelocity.y = -2.0f;
+                controller.slopeLimit = 45.0f;
+                controller.stepOffset = 0.5f;
+
+                lastTimeOnGround = coyoteTime;
+            }
+            else
+            {
+                controller.slopeLimit = 90.0f;
+                controller.stepOffset = 0.0f;
+
+                currentVelocity.y += controllerGravity * Time.deltaTime;
+                currentVelocity.y = Mathf.Clamp(currentVelocity.y, terminalVelocity, -terminalVelocity);
+
+                lastTimeOnGround -= Time.deltaTime;
+            }
+
+            if (Physics.Raycast(transform.position, transform.up, (controller.height / 2.0f) + 0.1f) && currentVelocity.y > 0.0f)
+            {
+                currentVelocity.y = -2.0f;
+            }
+
+            if (Input.GetButtonDown(jumpButton))
+            {
+                jumpPressedTime = bufferTime;
+            }
+            else
+            {
+                jumpPressedTime -= Time.deltaTime;
+            }
+
+            if (Input.GetButton(runButton))
+            {
+                StartRunning();
+            }
+
+            if (Input.GetButtonUp(runButton))
+            {
+                StopRunning();
+            }
+
+            if (Input.GetButtonDown(crouchButton))
+            {
+                StartCrouching();
+            }
+
+            if (Input.GetButtonUp(crouchButton))
+            {
+                StopCrouching();
+            }
+
+            if (jumpPressedTime > 0.0f && lastTimeOnGround > 0.0f)
+            {
+                Jump();
+            }
+
+            if (currentDirection.magnitude > 0.0f && canWalk)
+            {
+                controller.Move(currentDirection * controllerSpeed * Time.deltaTime);
+            }
+
+            controller.Move(currentVelocity * Time.deltaTime);
         }
-        else
-        {
-            controller.slopeLimit = 90.0f;
-            controller.stepOffset = 0.0f;
-
-            currentVelocity.y += controllerGravity * Time.deltaTime;
-            currentVelocity.y = Mathf.Clamp(currentVelocity.y, terminalVelocity, -terminalVelocity);
-
-            lastTimeOnGround -= Time.deltaTime;
-        }
-
-        if (Physics.Raycast(transform.position, transform.up, (controller.height / 2.0f) + 0.1f) && currentVelocity.y > 0.0f)
-        {
-            currentVelocity.y = -2.0f;
-        }
-
-        if (Input.GetButtonDown(jumpButton))
-        {
-            jumpPressedTime = bufferTime;
-        }
-        else
-        {
-            jumpPressedTime -= Time.deltaTime;
-        }
-
-        if (Input.GetButton(runButton))
-        {
-            StartRunning();
-        }
-
-        if (Input.GetButtonUp(runButton))
-        {
-            StopRunning();
-        }
-
-        if (Input.GetButtonDown(crouchButton))
-        {
-            StartCrouching();
-        }
-
-        if (Input.GetButtonUp(crouchButton))
-        {
-            StopCrouching();
-        }
-
-        if (jumpPressedTime > 0.0f && lastTimeOnGround > 0.0f)
-        {
-            Jump();
-        }
-
-        if (currentDirection.magnitude > 0.0f && canWalk)
-        {
-            controller.Move(currentDirection * controllerSpeed * Time.deltaTime);
-        }
-
-        controller.Move(currentVelocity * Time.deltaTime);
     }
 
     void Jump()

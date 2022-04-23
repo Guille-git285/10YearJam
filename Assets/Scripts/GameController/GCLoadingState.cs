@@ -19,7 +19,7 @@ public class GCLoadingState : GCState
 
     public override void OnStateExit()
     {
-        
+        GameControl.UpdateScenes();
     }
 
     private IEnumerator LoadingScene(string currentScene, string targetScene)

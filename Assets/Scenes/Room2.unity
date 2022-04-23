@@ -189,7 +189,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4744160540917306722, guid: b6d45eef727047c4bbe00c41b4e9faea, type: 3}
       propertyPath: transitionSceneTarget
-      value: Room2
+      value: Room3
       objectReference: {fileID: 0}
     - target: {fileID: 5637035448427716725, guid: b6d45eef727047c4bbe00c41b4e9faea, type: 3}
       propertyPath: m_RootOrder
@@ -567,7 +567,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4744160540917306722, guid: b6d45eef727047c4bbe00c41b4e9faea, type: 3}
       propertyPath: transitionSceneTarget
-      value: EntryArea
+      value: Room1
       objectReference: {fileID: 0}
     - target: {fileID: 5637035448427716725, guid: b6d45eef727047c4bbe00c41b4e9faea, type: 3}
       propertyPath: m_RootOrder

@@ -19,6 +19,8 @@ public struct LoadData
 
 public class GameController : MonoBehaviour
 {
+    public static bool isGamePaused = false;
+
     [SerializeField] private string currentScene;
     [SerializeField] private string nextScene;
     [SerializeField] private SceneType sceneType;
@@ -30,6 +32,7 @@ public class GameController : MonoBehaviour
 
     [SerializeField] private GameObject menuCamera;
     [SerializeField] private GameObject loadingScreen;
+    [SerializeField] private GameObject pauseMenu;
 
     public UnityEvent OnGameStart;
     public UnityEvent OnGameLoading;
@@ -50,13 +53,11 @@ public class GameController : MonoBehaviour
     public GameObject LoadingScreen { get => loadingScreen; }
     public SceneType SceneType { get => sceneType; }
     public GameObject MenuCamera { get => menuCamera; }
+    public GameObject PauseMenu { get => pauseMenu; }
 
     void Awake()
     {
-        if (SceneManager.sceneCount > 1)
-        {
-            currentScene = SceneManager.GetSceneAt(1).name;
-        }
+        UpdateScenes();
     }
 
     void Start()
@@ -118,5 +119,46 @@ public class GameController : MonoBehaviour
     public void GameOver ()
     {
         stateMachine.ChangeState("GameOverState");
+    }
+
+    public void UpdateScenes ()
+    {
+        if (SceneManager.sceneCount > 1)
+        {
+            currentScene = SceneManager.GetSceneAt(1).name;
+        }
+    }
+
+    private IEnumerator LoadingScene(string currentScene, string targetScene)
+    {
+        MenuCamera.SetActive(true);
+        LoadingScreen.SetActive(true);
+        Scene sceneToUnload = SceneManager.GetSceneByName(currentScene);
+
+        if (sceneToUnload.IsValid() && sceneToUnload.isLoaded)
+        {
+            AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(sceneToUnload);
+            while (!asyncUnload.isDone)
+            {
+                yield return null;
+            }
+        } else
+        {
+            Debug.Log("No current scene assign.");
+        }
+
+        int sceneToLoadIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Scenes/" + targetScene + ".unity");
+        if (sceneToLoadIndex != -1)
+        {
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoadIndex, LoadSceneMode.Additive);
+            while (!asyncLoad.isDone)
+            {
+                yield return null;
+            }
+        } else
+        {
+            Debug.Log("Scene name does not have a matching scene at Assets/Scenes/" + targetScene + ".unity");
+        }
+        LoadingScreen.SetActive(false);
     }
 }

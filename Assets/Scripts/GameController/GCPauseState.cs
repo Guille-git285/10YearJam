@@ -6,10 +6,10 @@ public class GCPauseState : GCState
 {
     public override void OnStateEnter()
     {
-        //Time.timeScale = 0;
-        //Cursor.lockState = CursorLockMode.Confined;
-        //Show Pause Menu
-        Debug.Log("Pause");
+        GameController.isGamePaused = true;
+        Time.timeScale = 0;
+        Cursor.lockState = CursorLockMode.Confined;
+        GameControl.PauseMenu.SetActive(true);
     }
 
     public override void OnStateUpdate()
@@ -22,9 +22,9 @@ public class GCPauseState : GCState
 
     public override void OnStateExit()
     {
-        //Hide Pause Menu
-        //Time.timeScale = 1;
-        //Cursor.lockState = CursorLockMode.Locked;
-        Debug.Log("Resume");
+        GameControl.PauseMenu.SetActive(false);
+        Time.timeScale = 1;
+        Cursor.lockState = CursorLockMode.Locked;
+        GameController.isGamePaused = false;
     }
 }

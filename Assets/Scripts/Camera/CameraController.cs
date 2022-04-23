@@ -23,13 +23,16 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        float x = Input.GetAxisRaw(mouseXAxis) * yawSensitivity;
-        float y = Input.GetAxisRaw(mouseYAxis) * pitchSensitivity;
+        if (!GameController.isGamePaused)
+        {
+            float x = Input.GetAxisRaw(mouseXAxis) * yawSensitivity;
+            float y = Input.GetAxisRaw(mouseYAxis) * pitchSensitivity;
 
-        pitch -= y;
-        pitch = Mathf.Clamp(pitch, -90.0f, 90.0f);
+            pitch -= y;
+            pitch = Mathf.Clamp(pitch, -90.0f, 90.0f);
 
-        transform.localRotation = Quaternion.Euler(pitch, 0.0f, 0.0f);
-        player.Rotate(Vector3.up * x);
+            transform.localRotation = Quaternion.Euler(pitch, 0.0f, 0.0f);
+            player.Rotate(Vector3.up * x);
+        }
     }
 }

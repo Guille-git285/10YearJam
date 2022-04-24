@@ -70,6 +70,7 @@ public class GameController : MonoBehaviour
         nextScene = "MainMenu";
         sceneType = SceneType.MENU;
         stateMachine.ChangeState("LoadingState");
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     public void StartNewGame ()

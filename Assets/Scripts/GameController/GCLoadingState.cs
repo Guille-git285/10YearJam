@@ -24,7 +24,7 @@ public class GCLoadingState : GCState
 
     private IEnumerator LoadingScene(string currentScene, string targetScene)
     {
-        GameControl.MenuCamera.SetActive(true);
+        //GameControl.MenuCamera.SetActive(true);
         GameControl.LoadingScreen.SetActive(true);
         Scene sceneToUnload = SceneManager.GetSceneByName(currentScene);
 
@@ -61,7 +61,7 @@ public class GCLoadingState : GCState
         else
         {
             nextState = "PlayingState";
-            GameControl.MenuCamera.SetActive(false);
+            //GameControl.MenuCamera.SetActive(false);
         }
         ChangeState(nextState);
     }

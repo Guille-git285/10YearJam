@@ -4,33 +4,18 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 
-public enum SceneType
-{
-    MENU,
-    LEVEL
-}
-
-public struct LoadData
-{
-    public string SceneName;
-    public SceneType Type;
-    public string MarkerName;
-}
-
 public class GameController : MonoBehaviour
 {
     public static bool isGamePaused = false;
 
     [SerializeField] private string currentScene;
     [SerializeField] private string nextScene;
-    [SerializeField] private SceneType sceneType;
 
     [SerializeField] private StateMachineRoot stateMachine;
 
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject playerPrefab;
 
-    [SerializeField] private GameObject menuCamera;
     [SerializeField] private GameObject loadingScreen;
     [SerializeField] private GameObject pauseMenu;
 
@@ -51,46 +36,47 @@ public class GameController : MonoBehaviour
     public string CurrentScene { get => currentScene; }
     public string NextScene { get => nextScene; }
     public GameObject LoadingScreen { get => loadingScreen; }
-    public SceneType SceneType { get => sceneType; }
-    public GameObject MenuCamera { get => menuCamera; }
     public GameObject PauseMenu { get => pauseMenu; }
 
     void Awake()
     {
-        UpdateScenes();
     }
 
     void Start()
     {
+        UpdateScenes();
+        if (Application.isEditor)
+        {
 
+        }
+        else
+        {
+            LoadMainMenu();
+        }
     }
 
     public void LoadMainMenu ()
     {
         nextScene = "MainMenu";
-        sceneType = SceneType.MENU;
-        stateMachine.ChangeState("LoadingState");
+        StartCoroutine(LoadingMainMenu(currentScene, nextScene));
         Cursor.lockState = CursorLockMode.Confined;
     }
 
     public void StartNewGame ()
     {
         nextScene = "EntryArea";
-        sceneType = SceneType.LEVEL;
-        stateMachine.ChangeState("LoadingState");
+        StartCoroutine(LoadingLevel("MainMenu", "EntryArea", "StartMarker"));
     }
 
     public void LoadCheckPoint ()
     {
         Debug.Log("Load Checkpoint");
-        stateMachine.ChangeState("LoadingState");
     }
 
     public void LoadLevel (string levelName, string markerName)
     {
         nextScene = levelName;
-        sceneType = SceneType.LEVEL;
-        stateMachine.ChangeState("LoadingState");
+        StartCoroutine(LoadingLevel(currentScene, nextScene, markerName));
     }
 
     public void SaveCheckPoint ()
@@ -100,21 +86,17 @@ public class GameController : MonoBehaviour
 
     public void PauseGame()
     {
-        //Time.timeScale = 0;
-        //Cursor.lockState = CursorLockMode.Confined;
         stateMachine.ChangeState("PauseState");
     }
 
     public void ResumeGame()
     {
-        //Time.timeScale = 1;
-        //Cursor.lockState = CursorLockMode.Locked;
         stateMachine.ChangeState("PlayingState");
     }
 
     public void ExitGame()
     {
-        stateMachine.ChangeState("ExitingState");
+        Application.Quit(0);
     }
 
     public void GameOver ()
@@ -130,10 +112,35 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private IEnumerator LoadingMainMenu(string currentScene, string targetScene)
+    {
+        Coroutine loadingScene = StartCoroutine(LoadingScene(currentScene, targetScene));
+        yield return loadingScene;
+        stateMachine.ChangeState("MenuState");
+    }
+
+    private IEnumerator LoadingLevel(string currentScene, string targetScene, string targetMarker)
+    {
+        Coroutine loadingScene = StartCoroutine(LoadingScene(currentScene, targetScene));
+        yield return loadingScene;
+        if (player != null)
+        {
+            GameObject marker = GameObject.Find(targetMarker);
+            if (marker != null)
+            {
+                player.transform.SetPositionAndRotation(marker.transform.position, marker.transform.rotation);
+            }
+            player.SetActive(true);
+        }
+        stateMachine.ChangeState("PlayingState");
+    }
+
     private IEnumerator LoadingScene(string currentScene, string targetScene)
     {
-        MenuCamera.SetActive(true);
+        stateMachine.ChangeState("LoadingState");
         LoadingScreen.SetActive(true);
+        if (player != null)
+            player.SetActive(false);
         Scene sceneToUnload = SceneManager.GetSceneByName(currentScene);
 
         if (sceneToUnload.IsValid() && sceneToUnload.isLoaded)

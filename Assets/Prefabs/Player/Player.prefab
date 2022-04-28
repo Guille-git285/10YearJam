@@ -204,7 +204,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   holdPositionTransform: {fileID: 8879786736365426467}
-  holdCenteringForce: 2
+  holdCenteringForce: 10
 --- !u!1 &2181272419273843058
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,6 +279,11 @@ MonoBehaviour:
   crouchSpeed: 2.5
   movementAccelOnGround: 0.1
   movementAccelOffGround: 0.005
+  whatIsWater:
+    serializedVersion: 2
+    m_Bits: 16
+  submergenceOffset: 0.5
+  submergenceRange: 1
   canJumpWhenCrouched: 0
   jumpHeight: 1.5
   coyoteTime: 0.12

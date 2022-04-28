@@ -22,6 +22,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float movementAccelOnGround = 0.1f;
     [SerializeField] private float movementAccelOffGround = 0.005f;
 
+    [Header("Swimming")]
+    [SerializeField] private LayerMask whatIsWater;
+    //[SerializeField] private float swimmingSpeed = 4.0f;
+    //[SerializeField] private float swimmingRunSpeed = 7.0f;
+    private float submergence = 0f;
+    [SerializeField] private float submergenceOffset = 0.5f;
+    [SerializeField, Min(0.1f)] private float submergenceRange = 1f;
+
     [Space]
     [SerializeField] private bool canJumpWhenCrouched = false;
     [SerializeField] private float jumpHeight = 1.5f;
@@ -163,9 +171,49 @@ public class PlayerController : MonoBehaviour
 
             controller.Move(currentVelocity * Time.deltaTime);
         }
+        Debug.DrawLine(transform.position + Vector3.up * submergenceOffset, (transform.position + Vector3.up * submergenceOffset) + Vector3.down * submergenceRange, Color.blue);
     }
 
-    void Jump()
+    void OnTriggerEnter(Collider other)
+    {
+        Debug.Log(other.gameObject.layer + " - " + whatIsWater);
+        if (other.gameObject.layer == whatIsWater)
+        {
+            EvaluateSubmergence();
+        }
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.layer == whatIsWater)
+        {
+            EvaluateSubmergence();
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.layer == whatIsWater)
+        {
+            EvaluateSubmergence();
+        }
+    }
+
+    void OnGUI()
+    {
+        GUI.Box(new Rect(10, 10, 100, 90), "Debug");
+        GUI.Label(new Rect(20, 40, 80, 20), "Sub: " + submergence);
+    }
+
+    private void EvaluateSubmergence ()
+    {
+        if (Physics.Raycast(transform.position + Vector3.up * submergenceOffset, Vector3.down, out RaycastHit hit, submergenceRange, whatIsWater, QueryTriggerInteraction.Collide))
+        {
+            submergence = 1f - hit.distance / submergenceRange;
+        }
+    }
+
+    private void Jump()
     {
         if (isCrouching && !canJumpWhenCrouched)
         {
@@ -181,7 +229,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void StartRunning()
+    private void StartRunning()
     {
         if (isRunning || isCrouching || !canRun ||
             currentDirection.magnitude == 0.0f || targetDirection.z <= 0.0f)
@@ -193,7 +241,7 @@ public class PlayerController : MonoBehaviour
         controllerSpeed = runSpeed;
     }
 
-    void StopRunning()
+    private void StopRunning()
     {
         if (isRunning)
         {
@@ -202,7 +250,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void StartCrouching()
+    private void StartCrouching()
     {
         if (!canCrouch)
         {
@@ -225,7 +273,7 @@ public class PlayerController : MonoBehaviour
             });
     }
 
-    void StopCrouching()
+    private void StopCrouching()
     {
         if (Physics.Raycast(transform.position, transform.up, controller.height * 1.5f))
         {

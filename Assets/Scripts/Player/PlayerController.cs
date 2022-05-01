@@ -24,11 +24,12 @@ public class PlayerController : MonoBehaviour
 
     [Header("Swimming")]
     [SerializeField] private LayerMask whatIsWater;
-    //[SerializeField] private float swimmingSpeed = 4.0f;
-    //[SerializeField] private float swimmingRunSpeed = 7.0f;
+    private bool touchingWater = false;
     private float submergence = 0f;
+    private float submergenceThreshold = 0.8f;
     [SerializeField] private float submergenceOffset = 0.5f;
     [SerializeField, Min(0.1f)] private float submergenceRange = 1f;
+    [SerializeField] private float swimmingSpeed = 5f;
 
     [Space]
     [SerializeField] private bool canJumpWhenCrouched = false;
@@ -93,99 +94,114 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (!GameController.isGamePaused)
+        if (GameController.isGamePaused)
         {
-            isOnGround = controller.isGrounded;
-
-            currentAcceleration = isOnGround ? movementAccelOnGround : movementAccelOffGround;
-            targetDirection.x = Mathf.MoveTowards(targetDirection.x, Input.GetAxisRaw(horizontalAxis), currentAcceleration);
-            targetDirection.z = Mathf.MoveTowards(targetDirection.z, Input.GetAxisRaw(verticalAxis), currentAcceleration);
-
-            currentDirection = transform.right * targetDirection.x + transform.forward * targetDirection.z;
-            currentDirection = Vector3.ClampMagnitude(currentDirection, 1.0f);
-
-            controllerGravity = Physics.gravity.y * gravityScale;
-
-            if (isOnGround)
-            {
-                currentVelocity.y = -2.0f;
-                controller.slopeLimit = 45.0f;
-                controller.stepOffset = 0.5f;
-
-                lastTimeOnGround = coyoteTime;
-            }
-            else
-            {
-                controller.slopeLimit = 90.0f;
-                controller.stepOffset = 0.0f;
-
-                currentVelocity.y += controllerGravity * Time.deltaTime;
-                currentVelocity.y = Mathf.Clamp(currentVelocity.y, terminalVelocity, -terminalVelocity);
-
-                lastTimeOnGround -= Time.deltaTime;
-            }
-
-            if (Physics.Raycast(transform.position, transform.up, (controller.height / 2.0f) + 0.1f) && currentVelocity.y > 0.0f)
-            {
-                currentVelocity.y = -2.0f;
-            }
-
-            if (Input.GetButtonDown(jumpButton))
-            {
-                jumpPressedTime = bufferTime;
-            }
-            else
-            {
-                jumpPressedTime -= Time.deltaTime;
-            }
-
-            if (Input.GetButton(runButton))
-            {
-                StartRunning();
-            }
-
-            if (Input.GetButtonUp(runButton))
-            {
-                StopRunning();
-            }
-
-            if (Input.GetButtonDown(crouchButton))
-            {
-                StartCrouching();
-            }
-
-            if (Input.GetButtonUp(crouchButton))
-            {
-                StopCrouching();
-            }
-
-            if (jumpPressedTime > 0.0f && lastTimeOnGround > 0.0f)
-            {
-                Jump();
-            }
-
-            if (currentDirection.magnitude > 0.0f && canWalk)
-            {
-                controller.Move(currentDirection * controllerSpeed * Time.deltaTime);
-            }
-
-            controller.Move(currentVelocity * Time.deltaTime);
+            return;
         }
-        Debug.DrawLine(transform.position + Vector3.up * submergenceOffset, (transform.position + Vector3.up * submergenceOffset) + Vector3.down * submergenceRange, Color.blue);
+
+        /*
+        */
+        if (submergence > submergenceThreshold)
+        {
+            currentAcceleration = movementAccelOffGround;
+            controller.slopeLimit = 90.0f;
+            controller.stepOffset = 0.0f;
+            float moveSideway = Input.GetAxisRaw(horizontalAxis);
+            float moveForward = Input.GetAxisRaw(verticalAxis);
+            currentDirection = camController.transform.right * moveSideway + camController.transform.forward * moveForward;
+            controller.Move(currentDirection.normalized * swimmingSpeed * Time.deltaTime);
+            return;
+        }
+
+        isOnGround = controller.isGrounded;
+
+        currentAcceleration = isOnGround ? movementAccelOnGround : movementAccelOffGround;
+        targetDirection.x = Mathf.MoveTowards(targetDirection.x, Input.GetAxisRaw(horizontalAxis), currentAcceleration);
+        targetDirection.z = Mathf.MoveTowards(targetDirection.z, Input.GetAxisRaw(verticalAxis), currentAcceleration);
+
+        currentDirection = transform.right * targetDirection.x + transform.forward * targetDirection.z;
+        currentDirection = Vector3.ClampMagnitude(currentDirection, 1.0f);
+
+        controllerGravity = Physics.gravity.y * gravityScale;
+
+        if (isOnGround)
+        {
+            currentVelocity.y = -2.0f;
+            controller.slopeLimit = 45.0f;
+            controller.stepOffset = 0.5f;
+
+            lastTimeOnGround = coyoteTime;
+        }
+        else
+        {
+            controller.slopeLimit = 90.0f;
+            controller.stepOffset = 0.0f;
+
+            currentVelocity.y += controllerGravity * Time.deltaTime;
+            currentVelocity.y = Mathf.Clamp(currentVelocity.y, terminalVelocity, -terminalVelocity);
+
+            lastTimeOnGround -= Time.deltaTime;
+        }
+
+        if (Physics.Raycast(transform.position, transform.up, (controller.height / 2.0f) + 0.1f) && currentVelocity.y > 0.0f)
+        {
+            currentVelocity.y = -2.0f;
+        }
+
+        if (Input.GetButtonDown(jumpButton))
+        {
+            jumpPressedTime = bufferTime;
+        }
+        else
+        {
+            jumpPressedTime -= Time.deltaTime;
+        }
+
+        if (Input.GetButton(runButton))
+        {
+            StartRunning();
+        }
+
+        if (Input.GetButtonUp(runButton))
+        {
+            StopRunning();
+        }
+
+        if (Input.GetButtonDown(crouchButton))
+        {
+            StartCrouching();
+        }
+
+        if (Input.GetButtonUp(crouchButton))
+        {
+            StopCrouching();
+        }
+
+        if (jumpPressedTime > 0.0f && lastTimeOnGround > 0.0f)
+        {
+            Jump();
+        }
+
+        if (currentDirection.magnitude > 0.0f && canWalk)
+        {
+            controller.Move(currentDirection * controllerSpeed * Time.deltaTime);
+        }
+
+        controller.Move(currentVelocity * Time.deltaTime);
     }
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.gameObject.layer + " - " + whatIsWater);
-        if (other.gameObject.layer == whatIsWater)
+        if ( (whatIsWater & (1 << other.gameObject.layer)) != 0)
         {
+            touchingWater = true;
             EvaluateSubmergence();
         }
     }
 
     void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.layer == whatIsWater)
+        if ((whatIsWater & (1 << other.gameObject.layer)) != 0)
         {
             EvaluateSubmergence();
         }
@@ -193,16 +209,18 @@ public class PlayerController : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer == whatIsWater)
+        if ((whatIsWater & (1 << other.gameObject.layer)) != 0)
         {
-            EvaluateSubmergence();
+            touchingWater = false;
+            submergence = 0f;
         }
     }
 
     void OnGUI()
     {
-        GUI.Box(new Rect(10, 10, 100, 90), "Debug");
-        GUI.Label(new Rect(20, 40, 80, 20), "Sub: " + submergence);
+        GUILayout.Label("Submergence: " + submergence);
+        GUILayout.Label("Vel: " + currentVelocity);
+        Debug.DrawLine(transform.position + Vector3.up * submergenceOffset, (transform.position + Vector3.up * submergenceOffset) + Vector3.down * submergenceRange, Color.blue);
     }
 
     private void EvaluateSubmergence ()
@@ -292,5 +310,15 @@ public class PlayerController : MonoBehaviour
                     controller.height = height;
                 });
         }
+    }
+
+    private void StartSwimming ()
+    {
+        canCrouch = false;
+    }
+
+    private void StopSwimming()
+    {
+        canCrouch = true;
     }
 }

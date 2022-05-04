@@ -98,7 +98,7 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-
+        EvaluateSubmergence();
         /*
         */
         if (submergence > submergenceThreshold)
@@ -220,14 +220,31 @@ public class PlayerController : MonoBehaviour
     {
         GUILayout.Label("Submergence: " + submergence);
         GUILayout.Label("Vel: " + currentVelocity);
-        Debug.DrawLine(transform.position + Vector3.up * submergenceOffset, (transform.position + Vector3.up * submergenceOffset) + Vector3.down * submergenceRange, Color.blue);
     }
 
-    private void EvaluateSubmergence ()
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * 0.5f, 0.5f);
+        Gizmos.DrawWireSphere(transform.position + Vector3.down * 0.5f, 0.5f);
+    }
+
+    /*
+    private void EvaluateSubmergence2 ()
     {
         if (Physics.Raycast(transform.position + Vector3.up * submergenceOffset, Vector3.down, out RaycastHit hit, submergenceRange, whatIsWater, QueryTriggerInteraction.Collide))
         {
             submergence = 1f - hit.distance / submergenceRange;
+        }
+    }
+    */
+
+    private void EvaluateSubmergence ()
+    {
+        if (Physics.SphereCast(transform.position + Vector3.up * ((controller.height / 2.0f) - controller.radius), controller.radius, Vector3.down, out RaycastHit hit, controller.height - controller.radius, whatIsWater, QueryTriggerInteraction.Collide))
+        {
+            Debug.DrawLine(transform.position, hit.point, Color.blue);
+            submergence = 1f - (hit.distance + controller.radius) / submergenceRange;
         }
     }
 

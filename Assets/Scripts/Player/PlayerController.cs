@@ -167,6 +167,8 @@ public class PlayerController : MonoBehaviour
         if (isCrouching && !canJumpWhenCrouched)
         {
             StopCrouching();
+            jumpPressedTime = 0.0f;
+            lastTimeOnGround = 0.0f;
             return;
         }
 

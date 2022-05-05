@@ -191,6 +191,11 @@ public class PlayerController : MonoBehaviour
         if ( (whatIsWater & (1 << other.gameObject.layer)) != 0)
         {
             touchingWater = true;
+            canCrouch = false;
+            if(isCrouching)
+            {
+                StopCrouching();
+            }
             EvaluateSubmergence();
         }
     }
@@ -207,15 +212,10 @@ public class PlayerController : MonoBehaviour
     {
         if ((whatIsWater & (1 << other.gameObject.layer)) != 0)
         {
+            canCrouch = true;
             touchingWater = false;
             submergence = 0f;
         }
-    }
-
-    void OnGUI()
-    {
-        GUILayout.Label("Water: " + touchingWater);
-        GUILayout.Label("Submergence: " + submergence);
     }
 
     private void EvaluateSubmergence ()

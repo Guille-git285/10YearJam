@@ -283,8 +283,7 @@ MonoBehaviour:
   whatIsWater:
     serializedVersion: 2
     m_Bits: 16
-  submergenceOffset: 0.5
-  submergenceRange: 1
+  submergenceThreshold: 0.5
   swimmingSpeed: 5
   canJumpWhenCrouched: 0
   jumpHeight: 1.5
@@ -410,7 +409,7 @@ GameObject:
   m_Layer: 0
   m_Name: HoldPoint
   m_TagString: Untagged
-  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1

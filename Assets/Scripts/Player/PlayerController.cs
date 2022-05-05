@@ -26,9 +26,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask whatIsWater;
     private bool touchingWater = false;
     private float submergence = 0f;
-    private float submergenceThreshold = 0.8f;
-    [SerializeField] private float submergenceOffset = 0.5f;
-    [SerializeField, Min(0.1f)] private float submergenceRange = 1f;
+    [SerializeField] private float submergenceThreshold = 0.5f;
     [SerializeField] private float swimmingSpeed = 5f;
 
     [Space]
@@ -98,9 +96,7 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
-        EvaluateSubmergence();
-        /*
-        */
+
         if (submergence > submergenceThreshold)
         {
             currentAcceleration = movementAccelOffGround;
@@ -218,33 +214,20 @@ public class PlayerController : MonoBehaviour
 
     void OnGUI()
     {
+        GUILayout.Label("Water: " + touchingWater);
         GUILayout.Label("Submergence: " + submergence);
-        GUILayout.Label("Vel: " + currentVelocity);
     }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + Vector3.up * 0.5f, 0.5f);
-        Gizmos.DrawWireSphere(transform.position + Vector3.down * 0.5f, 0.5f);
-    }
-
-    /*
-    private void EvaluateSubmergence2 ()
-    {
-        if (Physics.Raycast(transform.position + Vector3.up * submergenceOffset, Vector3.down, out RaycastHit hit, submergenceRange, whatIsWater, QueryTriggerInteraction.Collide))
-        {
-            submergence = 1f - hit.distance / submergenceRange;
-        }
-    }
-    */
 
     private void EvaluateSubmergence ()
     {
-        if (Physics.SphereCast(transform.position + Vector3.up * ((controller.height / 2.0f) - controller.radius), controller.radius, Vector3.down, out RaycastHit hit, controller.height - controller.radius, whatIsWater, QueryTriggerInteraction.Collide))
+        RaycastHit hit;
+        if (Physics.SphereCast(transform.position + Vector3.up * ((controller.height / 2.0f) + controller.radius), controller.radius, Vector3.down, out hit, controller.height + controller.radius, whatIsWater, QueryTriggerInteraction.Collide))
         {
-            Debug.DrawLine(transform.position, hit.point, Color.blue);
-            submergence = 1f - (hit.distance + controller.radius) / submergenceRange;
+            submergence = 1f - hit.distance / controller.height;
+        }
+        else if (touchingWater)
+        {
+            submergence = 1f;
         }
     }
 
@@ -327,15 +310,5 @@ public class PlayerController : MonoBehaviour
                     controller.height = height;
                 });
         }
-    }
-
-    private void StartSwimming ()
-    {
-        canCrouch = false;
-    }
-
-    private void StopSwimming()
-    {
-        canCrouch = true;
     }
 }

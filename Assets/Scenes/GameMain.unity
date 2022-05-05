@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000004, guid: 1007d52230514894697540771ebd63d1, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -827,8 +827,8 @@ Camera:
   m_GameObject: {fileID: 992217565}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.060742237, g: 0.06280159, b: 0.066037714, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -869,7 +869,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 992217565}
   m_LocalRotation: {x: 0, y: 0.7071071, z: 0, w: 0.7071065}
-  m_LocalPosition: {x: 11.32, y: 1.5, z: 8.06}
+  m_LocalPosition: {x: 11.32, y: 2.48, z: 8.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1485,10 +1485,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1911108011177452439, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.5
-      objectReference: {fileID: 0}
     - target: {fileID: 2181272419273843053, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -1499,7 +1495,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2181272419273843053, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 1.98
       objectReference: {fileID: 0}
     - target: {fileID: 2181272419273843053, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1536,10 +1532,6 @@ PrefabInstance:
     - target: {fileID: 2181272419273843058, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 2181272419273843058, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bc0991494d3cec44d9e92600f31cacef, type: 3}

@@ -22,6 +22,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float movementAccelOnGround = 0.1f;
     [SerializeField] private float movementAccelOffGround = 0.005f;
 
+    [Header("Swimming")]
+    [SerializeField] private LayerMask whatIsWater;
+    private bool touchingWater = false;
+    private float submergence = 0f;
+    [SerializeField] private float submergenceThreshold = 0.5f;
+    [SerializeField] private float swimmingSpeed = 5f;
+
     [Space]
     [SerializeField] private bool canJumpWhenCrouched = false;
     [SerializeField] private float jumpHeight = 1.5f;
@@ -85,87 +92,146 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (!GameController.isGamePaused)
+        if (GameController.isGamePaused)
         {
-            isOnGround = controller.isGrounded;
+            return;
+        }
 
-            currentAcceleration = isOnGround ? movementAccelOnGround : movementAccelOffGround;
-            targetDirection.x = Mathf.MoveTowards(targetDirection.x, Input.GetAxisRaw(horizontalAxis), currentAcceleration);
-            targetDirection.z = Mathf.MoveTowards(targetDirection.z, Input.GetAxisRaw(verticalAxis), currentAcceleration);
+        if (submergence > submergenceThreshold)
+        {
+            currentAcceleration = movementAccelOffGround;
+            controller.slopeLimit = 90.0f;
+            controller.stepOffset = 0.0f;
+            float moveSideway = Input.GetAxisRaw(horizontalAxis);
+            float moveForward = Input.GetAxisRaw(verticalAxis);
+            currentDirection = camController.transform.right * moveSideway + camController.transform.forward * moveForward;
+            controller.Move(currentDirection.normalized * swimmingSpeed * Time.deltaTime);
+            return;
+        }
 
-            currentDirection = transform.right * targetDirection.x + transform.forward * targetDirection.z;
-            currentDirection = Vector3.ClampMagnitude(currentDirection, 1.0f);
+        isOnGround = controller.isGrounded;
 
-            controllerGravity = Physics.gravity.y * gravityScale;
+        currentAcceleration = isOnGround ? movementAccelOnGround : movementAccelOffGround;
+        targetDirection.x = Mathf.MoveTowards(targetDirection.x, Input.GetAxisRaw(horizontalAxis), currentAcceleration);
+        targetDirection.z = Mathf.MoveTowards(targetDirection.z, Input.GetAxisRaw(verticalAxis), currentAcceleration);
 
-            if (isOnGround)
-            {
-                currentVelocity.y = -2.0f;
-                controller.slopeLimit = 45.0f;
-                controller.stepOffset = 0.5f;
+        currentDirection = transform.right * targetDirection.x + transform.forward * targetDirection.z;
+        currentDirection = Vector3.ClampMagnitude(currentDirection, 1.0f);
 
-                lastTimeOnGround = coyoteTime;
-            }
-            else
-            {
-                controller.slopeLimit = 90.0f;
-                controller.stepOffset = 0.0f;
+        controllerGravity = Physics.gravity.y * gravityScale;
 
-                currentVelocity.y += controllerGravity * Time.deltaTime;
-                currentVelocity.y = Mathf.Clamp(currentVelocity.y, terminalVelocity, -terminalVelocity);
+        if (isOnGround)
+        {
+            currentVelocity.y = -2.0f;
+            controller.slopeLimit = 45.0f;
+            controller.stepOffset = 0.5f;
 
-                lastTimeOnGround -= Time.deltaTime;
-            }
+            lastTimeOnGround = coyoteTime;
+        }
+        else
+        {
+            controller.slopeLimit = 90.0f;
+            controller.stepOffset = 0.0f;
 
-            if (Physics.Raycast(transform.position, transform.up, (controller.height / 2.0f) + 0.1f) && currentVelocity.y > 0.0f)
-            {
-                currentVelocity.y = -2.0f;
-            }
+            currentVelocity.y += controllerGravity * Time.deltaTime;
+            currentVelocity.y = Mathf.Clamp(currentVelocity.y, terminalVelocity, -terminalVelocity);
 
-            if (Input.GetButtonDown(jumpButton))
-            {
-                jumpPressedTime = bufferTime;
-            }
-            else
-            {
-                jumpPressedTime -= Time.deltaTime;
-            }
+            lastTimeOnGround -= Time.deltaTime;
+        }
 
-            if (Input.GetButton(runButton))
-            {
-                StartRunning();
-            }
+        if (Physics.Raycast(transform.position, transform.up, (controller.height / 2.0f) + 0.1f) && currentVelocity.y > 0.0f)
+        {
+            currentVelocity.y = -2.0f;
+        }
 
-            if (Input.GetButtonUp(runButton))
-            {
-                StopRunning();
-            }
+        if (Input.GetButtonDown(jumpButton))
+        {
+            jumpPressedTime = bufferTime;
+        }
+        else
+        {
+            jumpPressedTime -= Time.deltaTime;
+        }
 
-            if (Input.GetButtonDown(crouchButton))
-            {
-                StartCrouching();
-            }
+        if (Input.GetButton(runButton))
+        {
+            StartRunning();
+        }
 
-            if (Input.GetButtonUp(crouchButton))
+        if (Input.GetButtonUp(runButton))
+        {
+            StopRunning();
+        }
+
+        if (Input.GetButtonDown(crouchButton))
+        {
+            StartCrouching();
+        }
+
+        if (Input.GetButtonUp(crouchButton))
+        {
+            StopCrouching();
+        }
+
+        if (jumpPressedTime > 0.0f && lastTimeOnGround > 0.0f)
+        {
+            Jump();
+        }
+
+        if (currentDirection.magnitude > 0.0f && canWalk)
+        {
+            controller.Move(currentDirection * controllerSpeed * Time.deltaTime);
+        }
+
+        controller.Move(currentVelocity * Time.deltaTime);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if ( (whatIsWater & (1 << other.gameObject.layer)) != 0)
+        {
+            touchingWater = true;
+            canCrouch = false;
+            if(isCrouching)
             {
                 StopCrouching();
             }
-
-            if (jumpPressedTime > 0.0f && lastTimeOnGround > 0.0f)
-            {
-                Jump();
-            }
-
-            if (currentDirection.magnitude > 0.0f && canWalk)
-            {
-                controller.Move(currentDirection * controllerSpeed * Time.deltaTime);
-            }
-
-            controller.Move(currentVelocity * Time.deltaTime);
+            EvaluateSubmergence();
         }
     }
 
-    void Jump()
+    void OnTriggerStay(Collider other)
+    {
+        if ((whatIsWater & (1 << other.gameObject.layer)) != 0)
+        {
+            EvaluateSubmergence();
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if ((whatIsWater & (1 << other.gameObject.layer)) != 0)
+        {
+            canCrouch = true;
+            touchingWater = false;
+            submergence = 0f;
+        }
+    }
+
+    private void EvaluateSubmergence ()
+    {
+        RaycastHit hit;
+        if (Physics.SphereCast(transform.position + Vector3.up * ((controller.height / 2.0f) + controller.radius), controller.radius, Vector3.down, out hit, controller.height + controller.radius, whatIsWater, QueryTriggerInteraction.Collide))
+        {
+            submergence = 1f - hit.distance / controller.height;
+        }
+        else if (touchingWater)
+        {
+            submergence = 1f;
+        }
+    }
+
+    private void Jump()
     {
         if (isCrouching && !canJumpWhenCrouched)
         {
@@ -181,7 +247,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void StartRunning()
+    private void StartRunning()
     {
         if (isRunning || isCrouching || !canRun ||
             currentDirection.magnitude == 0.0f || targetDirection.z <= 0.0f)
@@ -193,7 +259,7 @@ public class PlayerController : MonoBehaviour
         controllerSpeed = runSpeed;
     }
 
-    void StopRunning()
+    private void StopRunning()
     {
         if (isRunning)
         {
@@ -202,7 +268,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void StartCrouching()
+    private void StartCrouching()
     {
         if (!canCrouch)
         {
@@ -225,7 +291,7 @@ public class PlayerController : MonoBehaviour
             });
     }
 
-    void StopCrouching()
+    private void StopCrouching()
     {
         if (Physics.Raycast(transform.position, transform.up, controller.height * 1.5f))
         {
